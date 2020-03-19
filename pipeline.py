@@ -14,10 +14,10 @@ from tfx.types import Channel
 from tfx.types.standard_artifacts import Model, ModelBlessing
 from tfx.utils.dsl_utils import external_input
 
-pipeline_name = 'taxi_chicago'
+pipeline_name = 'titanic'
 
 airflow_dir = os.path.join(os.environ['HOME'], 'airflow')
-data_dir = os.path.join(airflow_dir, 'data', 'taxi_data')
+data_dir = os.path.join(airflow_dir, 'data', 'titanic_data.csv')
 
 # Transform and Trainer both require user-defined functions to run successfully.
 transform_module = os.path.join(airflow_dir, 'dags', 'transform.py')
@@ -26,15 +26,10 @@ train_module = os.path.join(airflow_dir, 'dags', 'trainer.py')
 # Path which can be listened to by the model server.  Pusher will output the trained model here.
 serving_model_dir = os.path.join(airflow_dir, 'serving_model', pipeline_name)
 
-
 tfx_dir = os.path.join(airflow_dir, 'tfx')
 pipeline_dir = os.path.join(tfx_dir, 'pipelines', pipeline_name)
 # Sqlite ML-metadata db path.
 metadata_path = os.path.join(tfx_dir, 'metadata', pipeline_name, 'metadata.db')
-
-# Airflow-specific configs; these will be passed directly to airflow
-airflow_config = {'schedule_interval': None, 'start_date': datetime.datetime(2019, 1, 1)}
-
 
 """Implements the chicago taxi pipeline with TFX."""
 
@@ -67,18 +62,16 @@ model_resolver = ResolverNode(instance_name='latest_blessed_model_resolver',
 
 # Uses TFMA to compute a evaluation statistics over features of a model and
 # perform quality validation of a candidate model (compared to a baseline).
-eval_config = tfma.EvalConfig(model_specs=[tfma.ModelSpec(label_key='tips')],
+eval_config = tfma.EvalConfig(model_specs=[tfma.ModelSpec(label_key='Survived')],
                               slicing_specs=[tfma.SlicingSpec()],
-                              metrics_specs=[
-                                  tfma.MetricsSpec(
-                                      thresholds={
-                                          'binary_accuracy':
-                                              tfma.config.MetricThreshold(
-                                                  value_threshold=tfma.GenericValueThreshold(
-                                                      lower_bound={'value': 0.6}),
-                                                  change_threshold=tfma.GenericChangeThreshold(
-                                                      direction=tfma.MetricDirection.HIGHER_IS_BETTER,
-                                                      absolute={'value': -1e-10}))})])
+                              metrics_specs=[tfma.MetricsSpec(thresholds={
+                                  'binary_accuracy':
+                                      tfma.config.MetricThreshold(
+                                          value_threshold=tfma.GenericValueThreshold(
+                                              lower_bound={'value': 0.6}),
+                                          change_threshold=tfma.GenericChangeThreshold(
+                                              direction=tfma.MetricDirection.HIGHER_IS_BETTER,
+                                              absolute={'value': -1e-10}))})])
 
 model_analyzer = Evaluator(examples=example_gen.outputs['examples'],
                            model=trainer.outputs['model'],
@@ -104,4 +97,5 @@ tfx_pipeline = pipeline.Pipeline(pipeline_name=pipeline_name,
                                  beam_pipeline_args=['--direct_num_workers=0'])
 
 # 'DAG' below need to be kept for Airflow to detect dag.
+airflow_config = {'schedule_interval': None, 'start_date': datetime.datetime(2019, 1, 1)}
 DAG = AirflowDagRunner(AirflowPipelineConfig(airflow_config)).run(tfx_pipeline)
