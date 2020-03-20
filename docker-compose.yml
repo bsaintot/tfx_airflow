@@ -1,5 +1,16 @@
 version: '3'
 services:
+
+  serving:
+    image: tensorflow/serving
+    environment:
+      - MODEL_NAME=titanic
+    ports:
+      - "8500:8500"
+      - "8501:8501"
+    volumes:
+      - ./serving_model/titanic:/models/titanic
+
   postgres:
     image: postgres:9.6
     environment:
@@ -21,7 +32,7 @@ services:
       - EXECUTOR=Local
       - FERNET_KEY=jsDPRErfv8Z_eVTnGfF8ywd19j4pyqE3NpdUBA_oRTo=
     volumes:
-      - ./:/usr/local/airflow/dags
+      - ./serving_model:/usr/local/airflow/serving_model
     ports:
       - "8080:8080"
     command: webserver

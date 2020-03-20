@@ -3,7 +3,12 @@ FROM puckel/docker-airflow:1.10.3
 USER root
 RUN apt-get update
 
-RUN pip install 'tfx>=0.21.1,<0.22'
-RUN pip install 'tensorflow>=2.1,<2.2'
-RUN pip install 'tensorboard>=2.1,<2.2"'
-RUN pip install Flask==1.0.4
+COPY constants.py $AIRFLOW_HOME/dags/constants.py
+COPY trainer.py $AIRFLOW_HOME/dags/trainer.py
+COPY transform.py $AIRFLOW_HOME/dags/transform.py
+COPY pipeline.py $AIRFLOW_HOME/dags/pipeline.py
+
+COPY data $AIRFLOW_HOME/dags/data
+COPY setup.py $AIRFLOW_HOME/setup.py
+
+RUN pip install .
