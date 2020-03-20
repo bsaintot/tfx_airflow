@@ -16,8 +16,8 @@ from tfx.utils.dsl_utils import external_input
 
 pipeline_name = 'titanic'
 
-airflow_dir = os.path.join(os.environ['HOME'], 'airflow')
-data_dir = os.path.join(airflow_dir, 'data', 'titanic.csv')
+airflow_dir = os.environ['AIRFLOW_HOME']
+data_dir = os.path.join(airflow_dir, 'dags', 'data')
 
 transform_module = os.path.join(airflow_dir, 'dags', 'transform.py')
 train_module = os.path.join(airflow_dir, 'dags', 'trainer.py')
