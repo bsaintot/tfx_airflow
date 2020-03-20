@@ -55,14 +55,13 @@ def _input_fn(file_pattern: Text,
     """Generates features and label for tuning/training.
 
     Args:
-    file_pattern: input tfrecord file pattern.
-    tf_transform_output: A TFTransformOutput.
-    batch_size: representing the number of consecutive elements of returned
-      dataset to combine in a single batch
+        file_pattern: input tfrecord file pattern.
+        tf_transform_output: A TFTransformOutput.
+        batch_size: representing the number of consecutive elements of returned dataset to combine in a single batch
 
     Returns:
-    A dataset that contains (features, indices) tuple where features is a
-      dictionary of Tensors, and indices is a single Tensor of label indices.
+        A dataset that contains (features, indices) tuple where features is a dictionary of Tensors, and indices is a
+        single Tensor of label indices.
     """
     transformed_feature_spec = (
         tf_transform_output.transformed_feature_spec().copy())
@@ -81,10 +80,10 @@ def _build_keras_model(hidden_units: List[int] = None) -> tf.keras.Model:
     """Creates a DNN Keras model for classifying taxi data.
 
     Args:
-    hidden_units: [int], the layer sizes of the DNN (input layer first).
+        hidden_units: [int], the layer sizes of the DNN (input layer first).
 
     Returns:
-    A keras Model.
+        A keras Model.
     """
     real_valued_columns = [
         tf.feature_column.numeric_column(key, shape=())
@@ -120,13 +119,12 @@ def _wide_and_deep_classifier(wide_columns, deep_columns, dnn_hidden_units):
     """Build a simple keras wide and deep model.
 
     Args:
-    wide_columns: Feature columns wrapped in indicator_column for wide (linear)
-      part of the model.
-    deep_columns: Feature columns for deep part of the model.
-    dnn_hidden_units: [int], the layer sizes of the hidden DNN.
+        wide_columns: Feature columns wrapped in indicator_column for wide (linear) part of the model.
+        deep_columns: Feature columns for deep part of the model.
+        dnn_hidden_units: [int], the layer sizes of the hidden DNN.
 
     Returns:
-    A Wide and Deep Keras model
+        A Wide and Deep Keras model
     """
     # Following values are hard coded for simplicity in this example,
     # However prefarably they should be passsed in as hparams.
@@ -169,7 +167,7 @@ def run_fn(fn_args: TrainerFnArgs):
     """Train the model based on given args.
 
     Args:
-    fn_args: Holds args used to train the model as name/value pairs.
+        fn_args: Holds args used to train the model as name/value pairs.
     """
     # Number of nodes in the first layer of the DNN
     first_dnn_layer_size = 100

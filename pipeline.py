@@ -17,21 +17,18 @@ from tfx.utils.dsl_utils import external_input
 pipeline_name = 'titanic'
 
 airflow_dir = os.path.join(os.environ['HOME'], 'airflow')
-data_dir = os.path.join(airflow_dir, 'data', 'titanic_data.csv')
+data_dir = os.path.join(airflow_dir, 'data', 'titanic.csv')
 
-# Transform and Trainer both require user-defined functions to run successfully.
 transform_module = os.path.join(airflow_dir, 'dags', 'transform.py')
 train_module = os.path.join(airflow_dir, 'dags', 'trainer.py')
 
-# Path which can be listened to by the model server.  Pusher will output the trained model here.
 serving_model_dir = os.path.join(airflow_dir, 'serving_model', pipeline_name)
 
 tfx_dir = os.path.join(airflow_dir, 'tfx')
 pipeline_dir = os.path.join(tfx_dir, 'pipelines', pipeline_name)
-# Sqlite ML-metadata db path.
 metadata_path = os.path.join(tfx_dir, 'metadata', pipeline_name, 'metadata.db')
 
-"""Implements the chicago taxi pipeline with TFX."""
+"""Implements the Titanic kaggle with TFX."""
 
 example_gen = CsvExampleGen(input=external_input(data_dir))
 
@@ -60,8 +57,6 @@ model_resolver = ResolverNode(instance_name='latest_blessed_model_resolver',
                               model=Channel(type=Model),
                               model_blessing=Channel(type=ModelBlessing))
 
-# Uses TFMA to compute a evaluation statistics over features of a model and
-# perform quality validation of a candidate model (compared to a baseline).
 eval_config = tfma.EvalConfig(model_specs=[tfma.ModelSpec(label_key='Survived')],
                               slicing_specs=[tfma.SlicingSpec()],
                               metrics_specs=[tfma.MetricsSpec(thresholds={
@@ -79,7 +74,6 @@ model_analyzer = Evaluator(examples=example_gen.outputs['examples'],
                            # Change threshold will be ignored if there is no baseline (first run).
                            eval_config=eval_config)
 
-# Checks whether the model passed the validation steps and pushes the model to a file destination if check passed.
 pusher = Pusher(model=trainer.outputs['model'],
                 model_blessing=model_analyzer.outputs['blessing'],
                 push_destination=pusher_pb2.PushDestination(
