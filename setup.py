@@ -12,5 +12,5 @@ setup(
     install_requires=['tfx>=0.21.1,<0.22',
                       'tensorflow>=2.1,<2.2',
                       'tensorboard>=2.1,<2.2',
-                      'Flask==1.0.4'],
+                      'Flask==2.3.2'],
 )
